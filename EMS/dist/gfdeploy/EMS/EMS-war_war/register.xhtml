@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                template="./layout/homepage.xhtml"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui">
+
+    <ui:define name="content">
+        <h:form id="form">
+            <p:panelGrid columns="2">
+                <f:facet name="header">
+                    Create New Customer
+                </f:facet>
+                <h:outputLabel for="name">Name: </h:outputLabel>
+                <h:panelGroup>
+                    <p:inputText id="name" value="#{customerManagedBean.name}"
+                                 required="true" requiredMessage="Name is required" />
+                    <p:message for="name" />
+                </h:panelGroup>
+                <h:outputLabel for="username">Username: </h:outputLabel>
+                <h:panelGroup>
+                    <p:inputText id="username" value="#{customerManagedBean.username}"
+                                 required="true" requiredMessage="Username is required" />
+                    <p:message for="username" />
+                </h:panelGroup>
+                <h:outputLabel for="password">Password </h:outputLabel>
+                <h:panelGroup>
+                    <p:password id="password" value="#{customerManagedBean.password}"
+                                 required="true" requiredMessage="Password is required" />
+                    <p:message for="password" />
+                </h:panelGroup>
+                <h:outputLabel for="email">Email: </h:outputLabel>
+                <h:panelGroup>
+                    <p:inputText id="email" value="#{customerManagedBean.email}"
+                                 required="true" requiredMessage="Email is required" />
+                    <p:message for="email" />
+                </h:panelGroup>
+                <h:outputLabel for="phone">Phone: </h:outputLabel>
+                <h:panelGroup>
+                    <p:inputText id="phone" value="#{customerManagedBean.phoneNumber}"
+                                 required="true" requiredMessage="Phone is required" />
+                    <p:message for="phone" />
+                </h:panelGroup>
+            </p:panelGrid>
+            <br />
+            <p:fileUpload listener="#{authManagedBean.upload}" mode="advanced" dragDropSupport="true"
+                              update="messages" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" uploadLabel="Upload Profile Picture"/>
+                <p:growl id="messages" showDetail="true" /> 
+            <p:commandButton value="Submit"
+                             actionListener="#{customerManagedBean.addCustomer}"
+                             action="login.xhtml?faces-redirect=true"
+                             update=":form"
+                             />
+        </h:form>
+    </ui:define>
+
+</ui:composition>
