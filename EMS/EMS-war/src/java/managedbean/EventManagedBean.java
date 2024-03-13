@@ -19,8 +19,10 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.inject.Inject;
+import entity.Registration;
 import session.CustomerSessionBeanLocal;
 import session.EventSessionBeanLocal;
+import session.RegistrationSessionBeanLocal;
 
 /**
  *
@@ -29,6 +31,9 @@ import session.EventSessionBeanLocal;
 @Named(value = "eventManagedBean")
 @RequestScoped
 public class EventManagedBean {
+
+    @EJB(name = "RegistrationSessionBeanLocal")
+    private RegistrationSessionBeanLocal registrationSessionBeanLocal;
 
     @EJB
     private CustomerSessionBeanLocal customerSessionBeanLocal;
@@ -44,9 +49,9 @@ public class EventManagedBean {
     private String location;
     private String description;
     private Date deadline;
-    private long customerId;
-    private List<Event> events;
+    private Long customerId;
     private Long eId;
+    private List<Event> events;
     private Event selectedEvent;
     private String searchString;
     
@@ -114,6 +119,90 @@ public class EventManagedBean {
         init();
 
     } 
+    
+    public void loadEventDetails() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        Map<String, String> params = context.getExternalContext().getRequestParameterMap();
+        String eventIdStr = params.get("eventId");
+        if (eventIdStr != null) {
+            try {
+                Long eventId = Long.parseLong(eventIdStr);
+                selectedEvent = eventSessionBeanLocal.getEvent(eventId);
+                System.out.println("HELLO" + selectedEvent.getEventId());
+                if (selectedEvent == null) {
+                    context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Event not found."));
+                }
+            } catch (NumberFormatException e) {
+                context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Invalid event ID."));
+            } catch (Exception ex) {
+                context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Failed to load event details."));
+            }
+        } else {
+            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "Event ID is missing."));
+        }
+    }
+
+    public void createRegistration() {
+    FacesContext context = FacesContext.getCurrentInstance();
+    Map<String, String> params = context.getExternalContext().getRequestParameterMap();
+    String cIdStr = params.get("cId");
+    Long cId = Long.parseLong(cIdStr);
+    
+    selectedEvent = eventSessionBeanLocal.getEvent(cId);
+    
+    // Check if event deadline has passed or event date is over
+    Date now = new Date();
+    if (selectedEvent.getDeadline().before(now) || selectedEvent.getEventDate().before(now)) {
+        context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Registration deadline has passed or event is already over."));
+        return;
+    }
+    
+    Customer c = customerSessionBeanLocal.getCustomer(authenticationManagedBean.getUserId());
+    
+    // Check if customer is already registered for the event
+    boolean isRegistered = registrationSessionBeanLocal.isCustomerRegistered(c.getCustomerId(), selectedEvent.getEventId());
+    if (isRegistered) {
+        context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "You are already registered for this event."));
+        return;
+    }
+    
+    Registration r = new Registration();
+    r.setEvent(selectedEvent);
+    r.setAttended(false);
+    r.setCustomer(c);
+    
+    try {
+        registrationSessionBeanLocal.createNewRegistration(r);
+        c.getEventsRegistered().add(r);
+    } catch (Exception e) {
+        context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Unable to register"));
+        return;
+    }
+    
+    context.addMessage(null, new FacesMessage("Success", "Successfully registered for event"));
+}
+    
+    public void deleteRegistration() {
+        FacesContext context = FacesContext.getCurrentInstance();
+
+        Map<String, String> params = context.getExternalContext()
+                .getRequestParameterMap();
+        String cIdStr = params.get("cId");
+        Long cId = Long.parseLong(cIdStr);
+
+        try {
+            registrationSessionBeanLocal.deleteRegistration(cId);
+        } catch (Exception e) {
+            //show with an error icon
+            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Unable to unregister"));
+            return;
+        }
+
+        context.addMessage(null, new FacesMessage("Success", "Successfully unregister"));
+        init();
+
+    } 
+
     
     public String getTitle() {
         return title;
@@ -186,7 +275,13 @@ public class EventManagedBean {
     public void setSearchString(String searchString) {
         this.searchString = searchString;
     }
-    
-    
+
+    public Long geteId() {
+        return eId;
+    }
+
+    public void seteId(Long eId) {
+        this.eId = eId;
+    }
     
 }

@@ -29,5 +29,9 @@ public interface RegistrationSessionBeanLocal {
     public void markPresent(long regId);
 
     public void markAbsent(long regId);
+
+    public boolean isCustomerRegistered(Long customerId, Long eventId);
+
+    public List<Registration> retrieveAllRegistrationsWithCustomer(long cId);
     
 }

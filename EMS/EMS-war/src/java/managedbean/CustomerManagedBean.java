@@ -6,9 +6,11 @@
 package managedbean;
 
 import entity.Customer;
+import entity.Registration;
 import error.ErrorException;
 import java.io.Serializable;
 import java.util.Base64;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -20,6 +22,7 @@ import javax.faces.event.ActionEvent;
 import javax.persistence.NoResultException;
 import org.primefaces.model.file.UploadedFile;
 import session.CustomerSessionBeanLocal;
+import session.RegistrationSessionBeanLocal;
 
 /**
  *
@@ -29,9 +32,14 @@ import session.CustomerSessionBeanLocal;
 @SessionScoped
 public class CustomerManagedBean implements Serializable {
 
+    @EJB(name = "RegistrationSessionBeanLocal")
+    private RegistrationSessionBeanLocal registrationSessionBeanLocal;
+
     @EJB(name = "CustomerSessionBeanLocal")
     private CustomerSessionBeanLocal customerSessionBeanLocal;
     
+    
+
     private String name;
     private String username;
     private String password;
@@ -40,15 +48,16 @@ public class CustomerManagedBean implements Serializable {
     private byte[] profilePicByte;
     private String base64Image;
     private Customer customer;
-    
+    private List<Registration> regs;
     private UploadedFile file;
     private byte[] byteFile;
+
     /**
      * Creates a new instance of CustomerManagedBean
      */
     public CustomerManagedBean() {
     }
-    
+
     public void addCustomer(ActionEvent evt) throws ErrorException {
         Customer c = new Customer();
         c.setName(name);
@@ -59,7 +68,7 @@ public class CustomerManagedBean implements Serializable {
         c.setProfilePicByte(profilePicByte);
         customerSessionBeanLocal.createNewCustomer(c);
     }
-    
+
     public void getCustomer(Long id) {
         try {
             Customer c = customerSessionBeanLocal.getCustomer(id);
@@ -70,71 +79,76 @@ public class CustomerManagedBean implements Serializable {
             setEmail(c.getEmail());
             setPassword(c.getPassword());
             setPhoneNumber(c.getPhoneNumber());
-            
-            if (c.getProfilePicByte()!= null) {
+
+            if (c.getProfilePicByte() != null) {
                 this.setBase64Image("data:image/png;base64," + getImageAsBase64(c.getProfilePicByte()));
             }
         } catch (NoResultException ex) {
             Logger.getLogger(CustomerManagedBean.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }
-    
+
     public String updateProfile() {
         try {
             Customer currentUser = customerSessionBeanLocal.getCustomer(customer.getCustomerId()); // Get the current user from session
-            
+
             boolean isUpdated = false; // Flag to check if anything was updated
-            
+
             if (currentUser != null) {
                 // Check each field for changes and update as necessary
-                
+
                 if (!name.equals(currentUser.getName())) {
                     currentUser.setName(name);
                     isUpdated = true;
                 }
-                
+
                 if (!email.equals(currentUser.getEmail())) {
                     currentUser.setEmail(email);
                     isUpdated = true;
                 }
-                
+
                 if (!phoneNumber.equals(currentUser.getPhoneNumber())) {
                     currentUser.setPhoneNumber(phoneNumber);
                     isUpdated = true;
                 }
-                
+
                 if (file != null) {
                     byte[] newProfilePic = file.getContent();
                     currentUser.setProfilePicByte(newProfilePic);
                     isUpdated = true;
                 }
-                
+
                 if (isUpdated) {
                     customerSessionBeanLocal.updateCustomer(currentUser); // Method to persist the changes
-                    FacesContext.getCurrentInstance().addMessage(null, 
-                        new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Profile updated successfully."));
+                    FacesContext.getCurrentInstance().addMessage(null,
+                            new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Profile updated successfully."));
                 } else {
-                    FacesContext.getCurrentInstance().addMessage(null, 
-                        new FacesMessage(FacesMessage.SEVERITY_WARN, "No changes", "No changes detected."));
+                    FacesContext.getCurrentInstance().addMessage(null,
+                            new FacesMessage(FacesMessage.SEVERITY_WARN, "No changes", "No changes detected."));
                 }
             } else {
-                FacesContext.getCurrentInstance().addMessage(null, 
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No user logged in."));
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No user logged in."));
                 return null;
             }
         } catch (Exception e) {
-            FacesContext.getCurrentInstance().addMessage(null, 
-                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Update Error", "There was a problem updating the profile."));
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Update Error", "There was a problem updating the profile."));
             // Log the exception
             return null;
         }
         return "/profile?faces-redirect=true";
     }
-    
-   public String getImageAsBase64(byte[] profileImage) {
+
+    public String getImageAsBase64(byte[] profileImage) {
         return Base64.getEncoder().encodeToString(profileImage);
-    } 
+    }
+
+    public List<Registration> filter() {
+        regs = registrationSessionBeanLocal.retrieveAllRegistrationsWithCustomer(customer.getCustomerId());
+        return regs;
+    }
 
     public String getName() {
         return name;
@@ -208,7 +222,4 @@ public class CustomerManagedBean implements Serializable {
         this.byteFile = byteFile;
     }
 
-    
-    
-    
 }

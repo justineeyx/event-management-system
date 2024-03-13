@@ -68,14 +68,33 @@ public class RegistrationSessionBean implements RegistrationSessionBeanLocal {
     }
     
     @Override
+    public List<Registration> retrieveAllRegistrationsWithCustomer(long cId) 
+    {
+        Query query = em.createQuery("SELECT r FROM Registration r WHERE r.customer.customerId = :cId");
+        query.setParameter("cId", cId);
+        return query.getResultList();
+    }
+    
+    @Override
     public void deleteRegistration(long regId) throws NoResultException {
         Registration regRemove = getRegistration(regId);
-
+        regRemove.setCustomer(null);
+        regRemove.setEvent(null);
         if (regRemove.getCustomer() == null && regRemove.getEvent() == null) { //checks for user FK
             em.remove(regRemove);
         } else {
             throw new NoResultException("Registration ID " + regId + " is associated with existing customers or registrations and cannot be deleted!");
         }
+    }
+    
+     public boolean isCustomerRegistered(Long customerId, Long eventId) {
+        // This query checks if there's any registration that matches the customerId and eventId
+        String jpql = "SELECT COUNT(r) FROM Registration r WHERE r.customer.customerId = :customerId AND r.event.eventId = :eventId";
+        Long count = em.createQuery(jpql, Long.class)
+                                  .setParameter("customerId", customerId)
+                                  .setParameter("eventId", eventId)
+                                  .getSingleResult();
+        return count > 0; // If count is greater than 0, the customer is already registered
     }
     
     @Override
