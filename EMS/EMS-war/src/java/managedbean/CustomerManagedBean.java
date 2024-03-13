@@ -138,7 +138,7 @@ public class CustomerManagedBean implements Serializable {
             // Log the exception
             return null;
         }
-        return "/profile?faces-redirect=true";
+        return "/secret/viewProfile?faces-redirect=true";
     }
 
     public String getImageAsBase64(byte[] profileImage) {

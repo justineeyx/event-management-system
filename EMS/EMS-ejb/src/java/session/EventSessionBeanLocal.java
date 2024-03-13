@@ -6,6 +6,7 @@
 package session;
 
 import entity.Event;
+import entity.Registration;
 import error.ErrorException;
 import java.util.List;
 import javax.ejb.Local;
@@ -31,5 +32,7 @@ public interface EventSessionBeanLocal {
     public List<Event> retrieveEventsByName(String eventName);
 
     public List<Event> retrieveEventsByNameAndCustomer(String eventName, long customerId);
+
+    public Event retrieveEventsByRegId(long rId);
     
 }

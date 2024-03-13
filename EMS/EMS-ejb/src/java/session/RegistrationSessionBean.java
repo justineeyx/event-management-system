@@ -5,11 +5,11 @@
  */
 package session;
 
-import entity.Customer;
 import entity.Event;
 import entity.Registration;
 import error.ErrorException;
 import java.util.List;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -24,8 +24,13 @@ import javax.persistence.Query;
 @Stateless
 public class RegistrationSessionBean implements RegistrationSessionBeanLocal {
 
+    @EJB(name = "EventSessionBeanLocal")
+    private EventSessionBeanLocal eventSessionBeanLocal;
+
     @PersistenceContext(unitName = "EMS-ejbPU")
     private EntityManager em;
+    
+    
 
     // Add business logic below. (Right-click in editor and choose
     // "Insert Code > Add Business Method")
@@ -76,6 +81,14 @@ public class RegistrationSessionBean implements RegistrationSessionBeanLocal {
     }
     
     @Override
+    public List<Registration> retrieveAllRegistrationsWithEvent(long cId) 
+    {
+        Query query = em.createQuery("SELECT r FROM Registration r WHERE r.event.eventId = :cId");
+        query.setParameter("cId", cId);
+        return query.getResultList();
+    }
+    
+    @Override
     public void deleteRegistration(long regId) throws NoResultException {
         Registration regRemove = getRegistration(regId);
         regRemove.setCustomer(null);
@@ -87,6 +100,7 @@ public class RegistrationSessionBean implements RegistrationSessionBeanLocal {
         }
     }
     
+    @Override
      public boolean isCustomerRegistered(Long customerId, Long eventId) {
         // This query checks if there's any registration that matches the customerId and eventId
         String jpql = "SELECT COUNT(r) FROM Registration r WHERE r.customer.customerId = :customerId AND r.event.eventId = :eventId";
@@ -96,12 +110,16 @@ public class RegistrationSessionBean implements RegistrationSessionBeanLocal {
                                   .getSingleResult();
         return count > 0; // If count is greater than 0, the customer is already registered
     }
-    
+     
     @Override
     public void markPresent(long regId) 
     {
         Registration reg = getRegistration(regId);
         reg.setAttended(true);
+        Event e = eventSessionBeanLocal.retrieveEventsByRegId(regId);
+        for (Registration r:e.getRegistrations()) {
+            r.setAttended(true);
+        }
     }
     
     @Override
@@ -109,5 +127,9 @@ public class RegistrationSessionBean implements RegistrationSessionBeanLocal {
     {
         Registration reg = getRegistration(regId);
         reg.setAttended(false);
+        Event e = eventSessionBeanLocal.retrieveEventsByRegId(regId);
+        for (Registration r:e.getRegistrations()) {
+            r.setAttended(false);
+        }
     }
 }

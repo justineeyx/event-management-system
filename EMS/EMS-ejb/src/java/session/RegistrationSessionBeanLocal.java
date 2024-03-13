@@ -33,5 +33,7 @@ public interface RegistrationSessionBeanLocal {
     public boolean isCustomerRegistered(Long customerId, Long eventId);
 
     public List<Registration> retrieveAllRegistrationsWithCustomer(long cId);
+
+    public List<Registration> retrieveAllRegistrationsWithEvent(long cId);
     
 }

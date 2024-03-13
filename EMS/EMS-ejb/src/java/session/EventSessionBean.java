@@ -115,4 +115,11 @@ public class EventSessionBean implements EventSessionBeanLocal {
         query.setParameter("cId", customerId);
         return query.getResultList();
     }
+    
+    @Override
+    public Event retrieveEventsByRegId(long rId) {
+        Query query = em.createQuery("SELECT e FROM Event e WHERE e.registrations.registrationId = :rId");
+        query.setParameter("rId", rId);
+        return (Event)query.getSingleResult();
+    }
 }
