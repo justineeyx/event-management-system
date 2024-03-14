@@ -45,6 +45,9 @@ public class EventManagedBean {
     @Inject
     private AuthenticationManagedBean authenticationManagedBean;
     
+    @Inject
+    private RegManagedBean regManagedBean;
+    
     private String title;
     private Date eventDate;
     private String location;

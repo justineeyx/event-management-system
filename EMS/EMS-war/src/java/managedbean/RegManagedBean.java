@@ -48,6 +48,28 @@ public class RegManagedBean implements Serializable {
         return regs;
     }
     
+    public void loadEventDetails() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        Map<String, String> params = context.getExternalContext().getRequestParameterMap();
+        String eventIdStr = params.get("eventId");
+        if (eventIdStr != null) {
+            try {
+                Long eeId = Long.parseLong(eventIdStr);
+                selectedEvent = eventSessionBeanLocal.getEvent(this.eventId);
+                // System.out.println("HELLO" + selectedEvent.getEventId());
+                if (selectedEvent == null) {
+                    context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Event not found."));
+                }
+            } catch (NumberFormatException e) {
+                context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Invalid event ID."));
+            } catch (Exception ex) {
+                context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Failed to load event details."));
+            }
+        } else {
+            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "Event ID is missing."));
+        }
+    }
+    
     public void markPresent() {
         FacesContext context = FacesContext.getCurrentInstance();
 
