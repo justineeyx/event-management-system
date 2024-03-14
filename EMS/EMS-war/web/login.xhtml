@@ -9,6 +9,7 @@
 
     <ui:define name="content">
         <h:form id="form">
+            <p:growl id="growl" showDetail="true" sticky="true" />
             <p:panelGrid columns="2">
                 <f:facet name="header">
                     Log In
@@ -27,6 +28,7 @@
                 </h:panelGroup>
             </p:panelGrid>
             <br />
+            <p:growl id="messages" showDetail="true" /> 
             <p:commandButton value="Submit"
                              actionListener="#{authenticationManagedBean.login}"
                              action="/secret/home.xhtml?faces-redirect=true"

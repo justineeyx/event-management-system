@@ -91,7 +91,7 @@ public class EventSessionBean implements EventSessionBeanLocal {
     
     @Override
     public List<Event> retrieveEventsByCustomer(long customerId) throws ErrorException {
-        Query query = em.createQuery("SELECT e FROM Event e WHERE e.creator.customerId = :id");
+        Query query = em.createQuery("SELECT e FROM Event e WHERE e.creator.customerId = :id ORDER BY e.title ASC");
         query.setParameter("id", customerId);
         
         try {
@@ -118,8 +118,13 @@ public class EventSessionBean implements EventSessionBeanLocal {
     
     @Override
     public Event retrieveEventsByRegId(long rId) {
-        Query query = em.createQuery("SELECT e FROM Event e WHERE e.registrations.registrationId = :rId");
+        Query query = em.createQuery("SELECT e FROM Event e JOIN e.registrations r WHERE r.registrationId = :rId");
         query.setParameter("rId", rId);
-        return (Event)query.getSingleResult();
+        try {
+            return (Event) query.getSingleResult();
+        } catch (NoResultException e) {
+            return null; // or handle the absence of a result in another appropriate way for your application
+        }
     }
+
 }

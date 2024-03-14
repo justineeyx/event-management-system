@@ -116,10 +116,10 @@ public class RegistrationSessionBean implements RegistrationSessionBeanLocal {
     {
         Registration reg = getRegistration(regId);
         reg.setAttended(true);
-        Event e = eventSessionBeanLocal.retrieveEventsByRegId(regId);
-        for (Registration r:e.getRegistrations()) {
-            r.setAttended(true);
-        }
+//        Event e = eventSessionBeanLocal.retrieveEventsByRegId(regId);
+//        for (Registration r:e.getRegistrations()) {
+//            r.setAttended(true);
+//        }
     }
     
     @Override
@@ -127,9 +127,9 @@ public class RegistrationSessionBean implements RegistrationSessionBeanLocal {
     {
         Registration reg = getRegistration(regId);
         reg.setAttended(false);
-        Event e = eventSessionBeanLocal.retrieveEventsByRegId(regId);
-        for (Registration r:e.getRegistrations()) {
-            r.setAttended(false);
-        }
+//        Event e = eventSessionBeanLocal.retrieveEventsByRegId(regId);
+//        for (Registration r:e.getRegistrations()) {
+//            r.setAttended(false);
+//        }
     }
 }

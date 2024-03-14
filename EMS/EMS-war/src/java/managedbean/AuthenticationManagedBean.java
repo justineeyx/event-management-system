@@ -6,7 +6,12 @@ import javax.inject.Named;
 import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
 import javax.ejb.EJB;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
+import javax.faces.context.Flash;
 import javax.inject.Inject;
+import org.primefaces.event.FileUploadEvent;
+import org.primefaces.model.file.UploadedFile;
 import session.CustomerSessionBeanLocal;
 
 @Named(value = "authenticationManagedBean")
@@ -27,20 +32,22 @@ public class AuthenticationManagedBean implements Serializable {
     }
 
     public String login() throws ErrorException {
-        //by right supposed to use a session bean to
-        //do validation here
-        //...
-        //simulate username/password
+        FacesContext context = FacesContext.getCurrentInstance();
+        Flash flash = context.getExternalContext().getFlash();
+        flash.setKeepMessages(true); // Keep messages for the redirect
+
         try {
             Customer c = customerSessionBeanLocal.customerLogin(username, password);
             userId = c.getCustomerId();
             customerManagedBean.getCustomer(userId);
+            context.addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Successfully logged in"));
             return "/secret/home.xhtml?faces-redirect=true";
-        } catch(ErrorException ex) {
-            throw new ErrorException("Username does not exist or invalid password!");
+        } catch (ErrorException ex) {
+            context.addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Login Error", "Username does not exist or invalid password!"));
+            return null; // Stay on the same page to display the error
         }
     }
-
+    
     public String logout() {
         username = null;
         password = null;

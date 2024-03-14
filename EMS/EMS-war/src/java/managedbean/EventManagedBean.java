@@ -20,6 +20,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.inject.Inject;
 import entity.Registration;
+import javax.faces.context.Flash;
 import session.CustomerSessionBeanLocal;
 import session.EventSessionBeanLocal;
 import session.RegistrationSessionBeanLocal;
@@ -70,29 +71,28 @@ public class EventManagedBean {
         }
     }
         
-    public void addEvent(ActionEvent evt) throws ErrorException {
+    public void addEvent(ActionEvent evt) {
         FacesContext context = FacesContext.getCurrentInstance();
+        Flash flash = context.getExternalContext().getFlash();
+        flash.setKeepMessages(true); // Keep messages for the redirect
+
         Event e = new Event();
         e.setEventDate(eventDate);
         e.setDeadline(deadline);
         e.setTitle(title);
         e.setDescription(description);
         e.setLocation(location);
-        // System.out.println("Customer id is " + authenticationManagedBean.getUserId());
         Customer c = customerSessionBeanLocal.getCustomer(authenticationManagedBean.getUserId());
         e.setCreator(c);
+
         try {
             eventSessionBeanLocal.createNewEvent(e);
+            context.addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Successfully created event"));
         } catch (Exception ex) {
-            //show with an error icon
-            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Unable to create event"));
-            return;
+            context.addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Unable to create event"));
         }
-
-        context.addMessage(null, new FacesMessage("Success", "Successfully created event"));
-        
-        
     }
+
     
     public void handleSearch() {
         init();
