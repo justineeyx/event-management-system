@@ -34,5 +34,7 @@ public interface EventSessionBeanLocal {
     public List<Event> retrieveEventsByNameAndCustomer(String eventName, long customerId);
 
     public Event retrieveEventsByRegId(long rId);
+
+    public void updateCustomer(Event e) throws NoResultException;
     
 }

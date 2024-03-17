@@ -96,6 +96,66 @@ public class EventManagedBean {
         }
     }
 
+    public String updateEvent() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        Flash flash = context.getExternalContext().getFlash();
+        flash.setKeepMessages(true); // Keep messages for the redirect
+        Map<String, String> params = context.getExternalContext()
+                .getRequestParameterMap();
+        String cIdStr = params.get("eventId");
+        Long cId = Long.parseLong(cIdStr);
+        try {
+            Event currentEvent = eventSessionBeanLocal.getEvent(cId); // Get the current user from session
+
+            boolean isUpdated = false; // Flag to check if anything was updated
+
+            if (currentEvent != null) {
+                // Check each field for changes and update as necessary
+
+                if (!title.equals(currentEvent.getTitle())) {
+                    currentEvent.setTitle(title);
+                    isUpdated = true;
+                }
+
+                if (!location.equals(currentEvent.getLocation())) {
+                    currentEvent.setLocation(location);
+                    isUpdated = true;
+                }
+
+                if (!description.equals(currentEvent.getDescription())) {
+                    currentEvent.setDescription(description);
+                    isUpdated = true;
+                }
+
+                if (!eventDate.equals(currentEvent.getEventDate())) {
+                    currentEvent.setEventDate(eventDate);
+                    isUpdated = true;
+                }
+                if (!deadline.equals(currentEvent.getDeadline())) {
+                    currentEvent.setDeadline(deadline);
+                    isUpdated = true;
+                }
+                if (isUpdated) {
+                    eventSessionBeanLocal.updateCustomer(selectedEvent); // Method to persist the changes
+                    context.addMessage("growl",
+                            new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Event updated successfully."));
+                } else {
+                    context.addMessage("growl",
+                            new FacesMessage(FacesMessage.SEVERITY_WARN, "No changes", "No changes detected."));
+                }
+            } else {
+                context.addMessage("growl",
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No user logged in."));
+                return null;
+            }
+        } catch (Exception e) {
+            context.addMessage("growl",
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Update Error", "There was a problem updating the profile."));
+            // Log the exception
+            return null;
+        }
+        return "/secret/viewEventsCreated?faces-redirect=true";
+    }
     
     public void handleSearch() {
         init();
@@ -143,7 +203,7 @@ public class EventManagedBean {
         if (eventIdStr != null) {
             try {
                 Long eventId = Long.parseLong(eventIdStr);
-                selectedEvent = eventSessionBeanLocal.getEvent(smth);
+                selectedEvent = eventSessionBeanLocal.getEvent(eventId);
                 System.out.println("HELLO" + selectedEvent.getEventId());
                 if (selectedEvent == null) {
                     context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Event not found."));

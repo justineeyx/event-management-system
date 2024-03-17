@@ -15,6 +15,7 @@ import java.util.Map;
 import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
+import javax.faces.context.Flash;
 import session.EventSessionBeanLocal;
 import session.RegistrationSessionBeanLocal;
 
@@ -56,7 +57,8 @@ public class RegManagedBean implements Serializable {
             try {
                 Long eeId = Long.parseLong(eventIdStr);
                 selectedEvent = eventSessionBeanLocal.getEvent(this.eventId);
-                // System.out.println("HELLO" + selectedEvent.getEventId());
+                System.out.println(eventId);
+                System.out.println("HELLO" + selectedEvent.getEventId());
                 if (selectedEvent == null) {
                     context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Event not found."));
                 }
@@ -112,6 +114,69 @@ public class RegManagedBean implements Serializable {
 
         context.addMessage(null, new FacesMessage("Success", "Marked Absent"));
         // init();
+    }
+    
+    public String updateEvent() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        Flash flash = context.getExternalContext().getFlash();
+        flash.setKeepMessages(true); // Keep messages for the redirect
+//        Map<String, String> params = context.getExternalContext()
+//                .getRequestParameterMap();
+//        String cIdStr = params.get("eventId");
+//        Long cId = Long.parseLong(cIdStr);
+        try {
+            
+            // System.out.println("FIRST " + selectedEvent.getEventId());
+            Event currentEvent = eventSessionBeanLocal.getEvent(this.eventId);
+            //System.out.println("SECOND " + (currentEvent != null ? currentEvent.getEventId() : "null"));
+            boolean isUpdated = false; // Flag to check if anything was updated
+
+            if (currentEvent != null) {
+                // Check each field for changes and update as necessary
+
+                if (!selectedEvent.getTitle().equals(currentEvent.getTitle())) {
+                    currentEvent.setTitle(selectedEvent.getTitle());
+                    isUpdated = true;
+                }
+
+                if (!selectedEvent.getLocation().equals(currentEvent.getLocation())) {
+                    currentEvent.setLocation(selectedEvent.getLocation());
+                    isUpdated = true;
+                }
+
+                if (!selectedEvent.getDescription().equals(currentEvent.getDescription())) {
+                    currentEvent.setDescription(selectedEvent.getDescription());
+                    isUpdated = true;
+                }
+
+                if (!selectedEvent.getEventDate().equals(currentEvent.getEventDate())) {
+                    currentEvent.setEventDate(selectedEvent.getEventDate());
+                    isUpdated = true;
+                }
+                if (!selectedEvent.getDeadline().equals(currentEvent.getDeadline())) {
+                    currentEvent.setDeadline(selectedEvent.getDeadline());
+                    isUpdated = true;
+                }
+                if (isUpdated) {
+                    eventSessionBeanLocal.updateCustomer(selectedEvent); // Method to persist the changes
+                    context.addMessage("growl",
+                            new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Event updated successfully."));
+                } else {
+                    context.addMessage("growl",
+                            new FacesMessage(FacesMessage.SEVERITY_WARN, "No changes", "No changes detected."));
+                }
+            } else {
+                context.addMessage("growl",
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No user logged in."));
+                return null;
+            }
+        } catch (Exception e) {
+            context.addMessage("growl",
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Update Error", "There was a problem updating the profile."));
+            // Log the exception
+            return null;
+        }
+        return "/secret/viewEventsCreated?faces-redirect=true";
     }
 
     public Event getSelectedEvent() {

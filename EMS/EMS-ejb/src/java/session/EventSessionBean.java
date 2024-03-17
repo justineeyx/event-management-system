@@ -5,6 +5,7 @@
  */
 package session;
 
+import entity.Customer;
 import entity.Event;
 import entity.Registration;
 import error.ErrorException;
@@ -127,4 +128,14 @@ public class EventSessionBean implements EventSessionBeanLocal {
         }
     }
 
+    @Override
+    public void updateCustomer(Event e) throws NoResultException {
+        Event newE = getEvent(e.getEventId());
+
+        newE.setTitle(e.getTitle());
+        newE.setLocation(e.getLocation());
+        newE.setDescription(e.getDescription());
+        newE.setEventDate(e.getEventDate());
+        newE.setDeadline(e.getDeadline());
+    }
 }
