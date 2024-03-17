@@ -52,7 +52,7 @@ public class AuthenticationManagedBean implements Serializable {
         username = null;
         password = null;
         userId = -1;
-        return "/login.xhtml?faces-redirect=true";
+        return "/index.xhtml?faces-redirect=true";
     }
 
     public String getUsername() {

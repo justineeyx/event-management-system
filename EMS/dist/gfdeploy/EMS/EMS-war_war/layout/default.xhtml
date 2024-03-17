@@ -6,29 +6,88 @@
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:p="http://primefaces.org/ui" >
     <h:head>
-        <meta http-equiv="Content-Type" content="text/html;
-              charset=UTF-8" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <h:outputStylesheet name="css/default.css"/>
         <h:outputStylesheet name="css/cssLayout.css"/>
         <title><ui:insert name="title">Title</ui:insert></title>
+        <style>
+            /* Global styles */
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f5f5f5;
+                margin: 0;
+                padding: 0;
+            }
+
+            /* Layout unit styles */
+            .layout-unit {
+                background-color: #f9f9f9;
+                padding: 20px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .welcome-message {
+                font-size: 24px;
+                font-weight: bold;
+                color: #036fab;
+                margin-bottom: 20px;
+            }
+
+            .menu-links {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .menu-links li {
+                margin-bottom: 10px;
+            }
+
+            .menu-links li a {
+                text-decoration: none;
+                color: #333;
+            }
+
+            .menu-links li a:hover {
+                text-decoration: underline;
+            }
+
+            .logout-button {
+                background-color: #d9534f;
+                color: #fff;
+                border: none;
+                border-radius: 3px;
+                padding: 10px 20px;
+                cursor: pointer;
+                font-size: 16px;
+                margin-top: 20px;
+            }
+
+            .logout-button:hover {
+                background-color: #c9302c;
+            }
+        </style>
     </h:head>
     <h:body>
-        Logged in User ID: #{authenticationManagedBean.userId}
-        <h:form>
-            <h:commandButton value="Logout"
-                             action="#{authenticationManagedBean.logout}"/>
-        </h:form>
         <p:layout>
             <p:layoutUnit position="west" resizable="true"
-                          size="200" minSize="40" maxSize="300">
-                <a href="viewProfile.xhtml">View My Profile</a><br />
-                <a href="editProfile.xhtml">Edit My Profile</a><br />
-                <br />
-                <a href="createEvent.xhtml">Create New Event</a><br />
-                <a href="viewEventsCreated.xhtml">View Events Created</a><br />
-                <a href="searchEvents.xhtml">Search for Event</a>
-                <br />
-                <a href="viewRegistrations.xhtml">View My Registrations</a>
+                          size="200" minSize="40" maxSize="200" styleClass="layout-unit">
+                <p class="welcome-message">Welcome, #{authenticationManagedBean.username}!</p>
+                <ul class="menu-links">
+                    <li><a href="home.xhtml">Home</a></li>
+                    <li><a href="viewProfile.xhtml">View My Profile</a></li>
+                    <li><a href="editProfile.xhtml">Edit My Profile</a></li>
+                    <li><a href="createEvent.xhtml">Create New Event</a></li>
+                    <li><a href="viewEventsCreated.xhtml">View Events Created</a></li>
+                    <li><a href="searchEvents.xhtml">Search for Event</a></li>
+                    <li><a href="viewRegistrations.xhtml">View My Registrations</a></li>
+                </ul>
+                <!-- Logout button moved inside the layout unit -->
+                <h:form>
+                    <h:commandButton value="Logout" action="#{authenticationManagedBean.logout}" styleClass="logout-button"/>
+                </h:form>
             </p:layoutUnit>
             <p:layoutUnit position="center">
                 <ui:insert name="content">Content</ui:insert>
@@ -36,4 +95,3 @@
         </p:layout>
     </h:body>
 </html>
-

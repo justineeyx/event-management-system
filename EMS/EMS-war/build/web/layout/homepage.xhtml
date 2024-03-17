@@ -6,20 +6,106 @@
 
     <h:head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <h:outputStylesheet name="css/default.css"/>
-        <h:outputStylesheet name="css/cssLayout.css"/>
         <title>Facelets Template</title>
+        <style>
+            /* Global styles */
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f5f5f5;
+                margin: 0;
+                padding: 0;
+            }
+
+            /* Top navigation styles */
+            #top {
+                background-color: #036fab;
+                color: white;
+                padding: 10px;
+                text-align: right;
+            }
+
+            #top a {
+                color: white;
+                text-decoration: none;
+                margin-left: 10px;
+            }
+
+            #top a:hover {
+                text-decoration: underline;
+            }
+
+            /* Content area styles */
+            #content {
+                margin: 20px auto;
+                padding: 20px;
+                background-color: #ffffff;
+                width: 80%;
+                max-width: 800px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                border-radius: 5px;
+            }
+
+            /* Content heading styles */
+            h2 {
+                color: #036fab;
+                border-bottom: 2px solid #036fab;
+                padding-bottom: 5px;
+                margin-bottom: 15px;
+            }
+
+            /* Paragraph styles */
+            p {
+                line-height: 1.6;
+                color: #333;
+            }
+
+            /* Link styles */
+            a {
+                color: #036fab;
+                text-decoration: none;
+            }
+
+            a:hover {
+                text-decoration: underline;
+            }
+        </style>
     </h:head>
 
     <h:body>
 
-        <div id="top" class="top">
-            <a href="register.xhtml">Register</a>
+        <div id="top">
+            <a href="register.xhtml">Sign Up</a>
             <a href="login.xhtml">Login</a>
         </div>
 
-        <div id="content" class="center_content">
-            <ui:insert name="content">Content</ui:insert>
+        <div id="content">
+            <ui:insert name="content">
+                <h2>Welcome to Event Management System</h2>
+                <p>
+                    Our Event Management System (EMS) is a powerful tool designed to streamline the planning and execution of events, whether they are corporate conferences, social gatherings, or educational workshops.
+                </p>
+                <p>
+                    With EMS, you can effortlessly create new events, manage registrations, send out invitations, track attendance, and much more. Our user-friendly interface and comprehensive features make organizing events a breeze.
+                </p>
+                <h3>Key Features:</h3>
+                <ul>
+                    <li><strong>Event Creation:</strong> Easily create new events by providing essential details such as event name, date, location, and description.</li>
+                    <li><strong>Registration Management:</strong> Efficiently manage event registrations, track attendee information, and handle ticketing options.</li>
+                    <li><strong>Attendance Tracking:</strong> Keep track of event attendance in real-time, allowing for accurate reporting and analysis.</li>
+                    <li><strong>Event Browsing:</strong> Effortlessly browse through events created by other users, and register for them to your heart's content. </li>
+                </ul>
+                <h3>Get Started:</h3>
+                <p>
+                    Ready to take your event planning to the next level? Sign up for an account today and start exploring the features of our Event Management System!
+                </p>
+                <p>
+                    If you already have an account, simply log in to access your account and begin organizing your next successful event.
+                </p>
+                <p>
+                    <a href="register.xhtml">Sign Up Now</a> | <a href="login.xhtml">Log In</a>
+                </p>
+            </ui:insert>
+
         </div>
 
     </h:body>
