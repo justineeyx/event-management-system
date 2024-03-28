@@ -3,38 +3,75 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
-                template="./layout/homepage.xhtml"
-                xmlns:f="http://xmlns.jcp.org/jsf/core"
-                xmlns:p="http://primefaces.org/ui">
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough"
+                template="./layout/auth.xhtml">
+
+    <ui:define name="title">
+        Login
+    </ui:define>
 
     <ui:define name="content">
-        <h:form id="form">
-            <p:growl id="growl" showDetail="true" sticky="true" />
-            <p:panelGrid columns="2">
-                <f:facet name="header">
-                    Log In
-                </f:facet>
-                <h:outputLabel for="username">Username: </h:outputLabel>
-                <h:panelGroup>
-                    <p:inputText id="username" value="#{authenticationManagedBean.username}"
-                                 required="true" requiredMessage="Username is required" />
-                    <p:message for="username" />
-                </h:panelGroup>
-                <h:outputLabel for="password">Password: </h:outputLabel>
-                <h:panelGroup>
-                    <p:password id="password" value="#{authenticationManagedBean.password}"
-                                 required="true" requiredMessage="Password is required" />
-                    <p:message for="password" />
-                </h:panelGroup>
-            </p:panelGrid>
-            <br />
-            <p:growl id="messages" showDetail="true" /> 
-            <p:commandButton value="Submit"
-                             actionListener="#{authenticationManagedBean.login}"
-                             action="/secret/home.xhtml?faces-redirect=true"
-                             update=":form"
-                             />
-        </h:form>
+        <div class="content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <img src="plugins/images/undraw_remotely_2j6y.svg" alt="Image" class="img-fluid" />
+                    </div>
+                    <div class="col-md-6 contents">
+                        <div class="row justify-content-center">
+                            <div class="col-md-8">
+                                <div class="mb-4">
+                                    <h3>Sign In</h3>
+
+                                </div>
+                                <h:form id="loginForm">
+                                    <!-- Assuming you have a message component to show login errors -->
+                                    <h:messages globalOnly="true" layout="table" styleClass="text-danger"/>
+
+                                    <div class="form-group first">
+                                        
+                                        <h:inputText id="username" 
+                                                     value="#{authenticationManagedBean.username}" 
+                                                     required="true" 
+                                                     requiredMessage="Username is required" 
+                                                     class="form-control"
+                                                     a:placeholder="Username" />
+                                        <h:message for="username" class="text-danger"/>
+                                    </div>
+
+                                    <div class="form-group last mb-4">
+                                        <h:inputSecret id="password" 
+                                                       value="#{authenticationManagedBean.password}" 
+                                                       required="true" 
+                                                       requiredMessage="Password is required" 
+                                                       class="form-control" 
+                                                       a:placeholder="Password" />
+                                        <h:message for="password" class="text-danger"/>
+                                    </div>
+
+
+                                    <h:commandButton value="Log In" action="#{authenticationManagedBean.login}" class="btn btn-block btn-primary"/>
+                                    <h:button value="Sign Up" outcome="/register.xhtml" class="btn btn-block btn-primary" />
+
+                                    <span class="d-block text-left my-4 text-muted">&mdash; or login with &mdash;</span>
+                                    <div class="social-login">
+                                        <a href="#" class="facebook">
+                                            <span class="icon-facebook mr-3"></span> 
+                                        </a>
+                                        <a href="#" class="twitter">
+                                            <span class="icon-twitter mr-3"></span> 
+                                        </a>
+                                        <a href="#" class="google">
+                                            <span class="icon-google mr-3"></span> 
+                                        </a>
+                                    </div>
+                                </h:form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </ui:define>
 
 </ui:composition>

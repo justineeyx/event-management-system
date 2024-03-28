@@ -20,8 +20,6 @@ import javax.faces.context.FacesContext;
 import javax.faces.context.Flash;
 import javax.faces.event.ActionEvent;
 import javax.persistence.NoResultException;
-import org.primefaces.event.FileUploadEvent;
-import org.primefaces.model.file.UploadedFile;
 import session.CustomerSessionBeanLocal;
 import session.RegistrationSessionBeanLocal;
 
@@ -49,7 +47,7 @@ public class CustomerManagedBean implements Serializable {
     private String base64Image;
     private Customer customer;
     private List<Registration> regs;
-    private UploadedFile file;
+//    private UploadedFile file;
 
     /**
      * Creates a new instance of CustomerManagedBean
@@ -126,13 +124,13 @@ public class CustomerManagedBean implements Serializable {
                     isUpdated = true;
                 }
 
-                if (file != null) {
-                    byte[] newProfilePic = file.getContent();
-                    currentUser.setProfilePicByte(newProfilePic);
-                    this.setBase64Image("data:image/png;base64," + getImageAsBase64(newProfilePic));
-                    System.out.println(this.base64Image);
-                    isUpdated = true;
-                }
+//                if (file != null) {
+//                    byte[] newProfilePic = file.getContent();
+//                    currentUser.setProfilePicByte(newProfilePic);
+//                    this.setBase64Image("data:image/png;base64," + getImageAsBase64(newProfilePic));
+//                    System.out.println(this.base64Image);
+//                    isUpdated = true;
+//                }
 
                 if (isUpdated) {
                     customerSessionBeanLocal.updateCustomer(currentUser); // Method to persist the changes
@@ -165,26 +163,26 @@ public class CustomerManagedBean implements Serializable {
         return regs;
     }
     
-    public void upload(FileUploadEvent event) {
-        file = event.getFile();
-        if (file != null && file.getContent() != null) {
-            try {
-                byte[] content = file.getContent();
-                // Here, you would typically process the file, such as saving it to the database.
-                // For demonstration purposes, this example just logs the file size.
-                this.profilePicByte = content;
-                this.base64Image = "data:image/png;base64," + getImageAsBase64(profilePicByte);
-                FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", file.getFileName() + " uploaded successfully."));
-            } catch (Exception e) {
-                FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Upload Failure", "Failed to upload " + file.getFileName()));
-            }
-        } else {
-            FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "No file uploaded."));
-        }
-    }
+//    public void upload(FileUploadEvent event) {
+//        file = event.getFile();
+//        if (file != null && file.getContent() != null) {
+//            try {
+//                byte[] content = file.getContent();
+//                // Here, you would typically process the file, such as saving it to the database.
+//                // For demonstration purposes, this example just logs the file size.
+//                this.profilePicByte = content;
+//                this.base64Image = "data:image/png;base64," + getImageAsBase64(profilePicByte);
+//                FacesContext.getCurrentInstance().addMessage(null,
+//                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", file.getFileName() + " uploaded successfully."));
+//            } catch (Exception e) {
+//                FacesContext.getCurrentInstance().addMessage(null,
+//                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Upload Failure", "Failed to upload " + file.getFileName()));
+//            }
+//        } else {
+//            FacesContext.getCurrentInstance().addMessage(null,
+//                new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "No file uploaded."));
+//        }
+//    }
 
     public String getName() {
         return name;
@@ -242,12 +240,12 @@ public class CustomerManagedBean implements Serializable {
         this.base64Image = base64Image;
     }
 
-    public UploadedFile getFile() {
-        return file;
-    }
-
-    public void setFile(UploadedFile file) {
-        this.file = file;
-    }
+//    public UploadedFile getFile() {
+//        return file;
+//    }
+//
+//    public void setFile(UploadedFile file) {
+//        this.file = file;
+//    }
 
 }
