@@ -33,7 +33,7 @@ public class CustomerSessionBean implements CustomerSessionBeanLocal {
     public Customer createNewCustomer(Customer c) throws ErrorException {
        try {
            em.persist(c);
-           em.flush();
+           // em.flush();
            return c;
        } catch (PersistenceException ex) {
            if (ex.getCause() != null && ex.getCause().getClass().getName().equals("org.eclipse.persistence.exceptions.DatabaseException")) {
@@ -72,8 +72,8 @@ public class CustomerSessionBean implements CustomerSessionBeanLocal {
 
         customer.setEmail(c.getEmail());
         customer.setPhoneNumber(c.getPhoneNumber());
-        customer.setProfilePicByte(c.getProfilePicByte());
         customer.setName(c.getName());
+        customer.setFilename(c.getFilename());
     }
     
     

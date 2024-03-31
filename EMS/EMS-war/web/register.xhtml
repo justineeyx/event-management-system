@@ -3,58 +3,115 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
-                template="./layout/homepage.xhtml"
-                xmlns:f="http://xmlns.jcp.org/jsf/core"
-                xmlns:p="http://primefaces.org/ui">
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough"
+                template="./layout/auth.xhtml">
+
+    <ui:define name="title">
+        Login
+    </ui:define>
 
     <ui:define name="content">
-        <h:form id="form">
-            <p:growl id="growl" showDetail="true" sticky="true" />
-            <p:panelGrid columns="2">
-                <f:facet name="header">
-                    Create New User
-                </f:facet>
-                <h:outputLabel for="name">Name: </h:outputLabel>
-                <h:panelGroup>
-                    <p:inputText id="name" value="#{customerManagedBean.name}"
-                                 required="true" requiredMessage="Name is required" />
-                    <p:message for="name" />
-                </h:panelGroup>
-                <h:outputLabel for="username">Username: </h:outputLabel>
-                <h:panelGroup>
-                    <p:inputText id="username" value="#{customerManagedBean.username}"
-                                 required="true" requiredMessage="Username is required" />
-                    <p:message for="username" />
-                </h:panelGroup>
-                <h:outputLabel for="password">Password </h:outputLabel>
-                <h:panelGroup>
-                    <p:password id="password" value="#{customerManagedBean.password}"
-                                 required="true" requiredMessage="Password is required" />
-                    <p:message for="password" />
-                </h:panelGroup>
-                <h:outputLabel for="email">Email: </h:outputLabel>
-                <h:panelGroup>
-                    <p:inputText id="email" value="#{customerManagedBean.email}"
-                                 required="true" requiredMessage="Email is required" />
-                    <p:message for="email" />
-                </h:panelGroup>
-                <h:outputLabel for="phone">Phone: </h:outputLabel>
-                <h:panelGroup>
-                    <p:inputText id="phone" value="#{customerManagedBean.phoneNumber}"
-                                 required="true" requiredMessage="Phone is required" />
-                    <p:message for="phone" />
-                </h:panelGroup>
-            </p:panelGrid>
-            <br />
-            <p:fileUpload listener="#{customerManagedBean.upload}" mode="advanced" dragDropSupport="true"
-                              update="messages" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" uploadLabel="Upload Profile Picture"/>
-            <p:growl id="messages" showDetail="true" /> 
-            <p:commandButton value="Submit"
-                             actionListener="#{customerManagedBean.addCustomer}"
-                             action="login.xhtml?faces-redirect=true"
-                             update=":form"
-                             />
-        </h:form>
+        <div class="content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <img src="plugins/images/undraw_remotely_2j6y.svg" alt="Image" class="img-fluid" />
+                    </div>
+                    <div class="col-md-6 contents">
+                        <div class="row justify-content-center">
+                            <div class="col-md-8">
+                                <div class="mb-4">
+                                    <h3>Sign Up</h3>
+
+                                </div>
+                                <h:form id="loginForm" enctype="multipart/form-data">
+                                    <!-- Assuming you have a message component to show login errors -->
+                                    <h:messages globalOnly="true" layout="table" styleClass="text-danger"/>
+                                    
+                                    <div class="form-group first">
+                                        
+                                        <h:inputText id="name" 
+                                                     value="#{customerManagedBean.name}" 
+                                                     required="true" 
+                                                     requiredMessage="Name is required" 
+                                                     class="form-control"
+                                                     a:placeholder="Name" />
+                                        <h:message for="name" class="text-danger"/>
+                                    </div>
+
+                                    <div class="form-group first">
+                                        
+                                        <h:inputText id="username" 
+                                                     value="#{customerManagedBean.username}" 
+                                                     required="true" 
+                                                     requiredMessage="Username is required" 
+                                                     class="form-control"
+                                                     a:placeholder="Username" />
+                                        <h:message for="username" class="text-danger"/>
+                                    </div>
+
+                                    <div class="form-group first">
+                                        <h:inputText id="password" 
+                                                       value="#{customerManagedBean.password}" 
+                                                       required="true" 
+                                                       requiredMessage="Password is required" 
+                                                       class="form-control" 
+                                                       a:placeholder="Password" />
+                                        <h:message for="password" class="text-danger"/>
+                                    </div>
+                                    
+                                    <div class="form-group first">
+                                        
+                                        <h:inputText id="email" 
+                                                     value="#{customerManagedBean.email}" 
+                                                     required="true" 
+                                                     requiredMessage="Email is required" 
+                                                     class="form-control"
+                                                     a:placeholder="Email" />
+                                        <h:message for="email" class="text-danger"/>
+                                    </div>
+                                    
+                                    <div class="form-group first">
+                                        <h:inputText id="phone" 
+                                                     value="#{customerManagedBean.phoneNumber}" 
+                                                     required="true" 
+                                                     requiredMessage="Phone is required" 
+                                                     class="form-control"
+                                                     a:placeholder="Phone" />
+                                        <h:message for="phone" class="text-danger"/>
+                                    </div>
+                                    
+                                    <div class="col-md-4 gradient-custom text-center text-white"
+                                     style="border-top-left-radius: .5rem; border-bottom-left-radius: .5rem;">
+                                        <i class="far fa-edit mb-5"></i>
+                                        <h:inputFile value="#{customerManagedBean.uploadedfile}" style="display: none;" id="fileInput" />
+                                        <h:outputLabel for="fileInput" styleClass="btn btn-secondary">Choose Picture</h:outputLabel>
+                                        <h:commandButton value="Upload" action="#{customerManagedBean.upload()}" styleClass="btn btn-primary"/>
+                                    </div>
+
+                                    <h:commandButton value="Sign Up" actionListener="#{customerManagedBean.addCustomer}"  action="login.xhtml?faces-redirect=true" class="btn btn-block btn-primary"/>
+                                    <span class="d-block text-left my-4 text-muted">&mdash; already have an account? &mdash;</span>
+                                    <h:button value="Log In" outcome="/login.xhtml" class="btn btn-block btn-primary" />
+
+                                    <span class="d-block text-left my-4 text-muted">&mdash; or login with &mdash;</span>
+                                    <div class="social-login">
+                                        <a href="#" class="facebook">
+                                            <span class="icon-facebook mr-3"></span> 
+                                        </a>
+                                        <a href="#" class="twitter">
+                                            <span class="icon-twitter mr-3"></span> 
+                                        </a>
+                                        <a href="#" class="google">
+                                            <span class="icon-google mr-3"></span> 
+                                        </a>
+                                    </div>
+                                </h:form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </ui:define>
 
 </ui:composition>

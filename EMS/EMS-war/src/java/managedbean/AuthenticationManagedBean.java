@@ -49,6 +49,12 @@ public class AuthenticationManagedBean implements Serializable {
         username = null;
         password = null;
         userId = -1;
+        customerManagedBean.setName(null);
+        customerManagedBean.setUsername(null);
+        customerManagedBean.setPassword(null);
+        customerManagedBean.setEmail(null);
+        customerManagedBean.setPhoneNumber(null);
+        customerManagedBean.setFilename(null);
         return "/index.xhtml?faces-redirect=true";
     }
 

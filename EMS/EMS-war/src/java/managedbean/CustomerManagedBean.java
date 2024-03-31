@@ -7,8 +7,14 @@ package managedbean;
 
 import entity.Customer;
 import entity.Registration;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
-import java.util.Base64;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,6 +26,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.context.Flash;
 import javax.faces.event.ActionEvent;
 import javax.persistence.NoResultException;
+import javax.servlet.ServletContext;
+import javax.servlet.http.Part;
 import session.CustomerSessionBeanLocal;
 import session.RegistrationSessionBeanLocal;
 
@@ -43,11 +51,11 @@ public class CustomerManagedBean implements Serializable {
     private String password;
     private String phoneNumber;
     private String email;
-    private byte[] profilePicByte;
     private String base64Image;
     private Customer customer;
     private List<Registration> regs;
-//    private UploadedFile file;
+    private Part uploadedfile;
+    private String filename = "";
 
     /**
      * Creates a new instance of CustomerManagedBean
@@ -55,7 +63,7 @@ public class CustomerManagedBean implements Serializable {
     public CustomerManagedBean() {
     }
 
-    public void addCustomer(ActionEvent evt) {
+    public void addCustomer(ActionEvent evt) throws IOException {
         FacesContext context = FacesContext.getCurrentInstance();
         Flash flash = context.getExternalContext().getFlash();
         flash.setKeepMessages(true); // Keep messages for the redirect
@@ -66,8 +74,12 @@ public class CustomerManagedBean implements Serializable {
         c.setPassword(password);
         c.setEmail(email);
         c.setPhoneNumber(phoneNumber);
-        c.setProfilePicByte(profilePicByte);
-
+        // c.setUploadedFile(uploadedfile);
+        
+        if (filename != null) {
+            c.setFilename(filename);
+        }
+        
         try {
             customerSessionBeanLocal.createNewCustomer(c);
             context.addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_INFO, "Registration Success", "Successfully registered"));
@@ -87,10 +99,10 @@ public class CustomerManagedBean implements Serializable {
             setEmail(c.getEmail());
             setPassword(c.getPassword());
             setPhoneNumber(c.getPhoneNumber());
-
-            if (c.getProfilePicByte() != null) {
-                this.setBase64Image("data:image/png;base64," + getImageAsBase64(c.getProfilePicByte()));
+            if (c.getFilename() != null) {
+                setFilename(c.getFilename());
             }
+
         } catch (NoResultException ex) {
             Logger.getLogger(CustomerManagedBean.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -123,14 +135,12 @@ public class CustomerManagedBean implements Serializable {
                     currentUser.setPhoneNumber(phoneNumber);
                     isUpdated = true;
                 }
-
-//                if (file != null) {
-//                    byte[] newProfilePic = file.getContent();
-//                    currentUser.setProfilePicByte(newProfilePic);
-//                    this.setBase64Image("data:image/png;base64," + getImageAsBase64(newProfilePic));
-//                    System.out.println(this.base64Image);
-//                    isUpdated = true;
-//                }
+                
+                if (!filename.equals(currentUser.getFilename())) {
+                    currentUser.setFilename(filename);
+                    System.out.println("Helllo");
+                    isUpdated = true;
+                }
 
                 if (isUpdated) {
                     customerSessionBeanLocal.updateCustomer(currentUser); // Method to persist the changes
@@ -154,35 +164,31 @@ public class CustomerManagedBean implements Serializable {
         return "/secret/viewProfile?faces-redirect=true";
     }
 
-    public String getImageAsBase64(byte[] profileImage) {
-        return Base64.getEncoder().encodeToString(profileImage);
-    }
-
     public List<Registration> filter() {
         regs = registrationSessionBeanLocal.retrieveAllRegistrationsWithCustomer(customer.getCustomerId());
         return regs;
     }
     
-//    public void upload(FileUploadEvent event) {
-//        file = event.getFile();
-//        if (file != null && file.getContent() != null) {
-//            try {
-//                byte[] content = file.getContent();
-//                // Here, you would typically process the file, such as saving it to the database.
-//                // For demonstration purposes, this example just logs the file size.
-//                this.profilePicByte = content;
-//                this.base64Image = "data:image/png;base64," + getImageAsBase64(profilePicByte);
-//                FacesContext.getCurrentInstance().addMessage(null,
-//                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", file.getFileName() + " uploaded successfully."));
-//            } catch (Exception e) {
-//                FacesContext.getCurrentInstance().addMessage(null,
-//                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Upload Failure", "Failed to upload " + file.getFileName()));
-//            }
-//        } else {
-//            FacesContext.getCurrentInstance().addMessage(null,
-//                new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "No file uploaded."));
-//        }
-//    }
+    public void upload() throws IOException {
+        // ServletContext ctx = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
+
+        //get the deployment path
+        String UPLOAD_DIRECTORY = "C:/Users/justi/OneDrive/Documents/NetBeans/event-management-system/EMS/EMS-war/web/upload/";
+        System.out.println("#UPLOAD_DIRECTORY : " + UPLOAD_DIRECTORY);
+        System.out.println(uploadedfile);
+
+        //debug purposes
+        setFilename(Paths.get(uploadedfile.getSubmittedFileName()).getFileName().toString());
+        System.out.println("filename: " + getFilename());
+        System.out.println(filename);
+        //---------------------
+        
+        //replace existing file
+        Path path = Paths.get(UPLOAD_DIRECTORY + getFilename());
+        InputStream bytes = uploadedfile.getInputStream();
+        Files.copy(bytes, path, StandardCopyOption.REPLACE_EXISTING);
+    }
+
 
     public String getName() {
         return name;
@@ -224,14 +230,6 @@ public class CustomerManagedBean implements Serializable {
         this.email = email;
     }
 
-    public byte[] getProfilePicByte() {
-        return profilePicByte;
-    }
-
-    public void setProfilePicByte(byte[] profilePicByte) {
-        this.profilePicByte = profilePicByte;
-    }
-
     public String getBase64Image() {
         return base64Image;
     }
@@ -240,12 +238,28 @@ public class CustomerManagedBean implements Serializable {
         this.base64Image = base64Image;
     }
 
-//    public UploadedFile getFile() {
-//        return file;
-//    }
-//
-//    public void setFile(UploadedFile file) {
-//        this.file = file;
-//    }
+    public Part getUploadedfile() {
+        return uploadedfile;
+    }
 
+    public void setUploadedfile(Part uploadedfile) {
+        this.uploadedfile = uploadedfile;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+    
 }

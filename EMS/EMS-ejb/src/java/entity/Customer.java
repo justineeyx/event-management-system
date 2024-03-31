@@ -6,13 +6,13 @@
 package entity;
 
 import java.io.Serializable;
-import java.sql.Blob;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.servlet.http.Part;
 
 /**
  *
@@ -30,7 +30,8 @@ public class Customer implements Serializable {
     private String password;
     private String phoneNumber;
     private String email;
-    private byte[] profilePicByte;
+    private Part uploadedFile;
+    private String filename;
     @OneToMany(mappedBy="creator")
     private List<Event> eventsCreated;
     @OneToMany(mappedBy="customer")
@@ -97,14 +98,6 @@ public class Customer implements Serializable {
         this.email = email;
     }
 
-    public byte[] getProfilePicByte() {
-        return profilePicByte;
-    }
-
-    public void setProfilePicByte(byte[] profilePicByte) {
-        this.profilePicByte = profilePicByte;
-    }
-
     public List<Registration> getEventsRegistered() {
         return eventsRegistered;
     }
@@ -136,4 +129,22 @@ public class Customer implements Serializable {
     public void setEventsCreated(List<Event> eventsCreated) {
         this.eventsCreated = eventsCreated;
     }
+
+    public Part getUploadedFile() {
+        return uploadedFile;
+    }
+
+    public void setUploadedFile(Part uploadedFile) {
+        this.uploadedFile = uploadedFile;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+    
+    
 }

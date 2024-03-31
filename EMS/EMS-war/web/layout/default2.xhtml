@@ -28,7 +28,11 @@
 
         <!-- Template Main CSS File -->
         <link href="#{request.contextPath}/assets/css/main.css" rel="stylesheet"/>
-
+        <style>
+        .welcome-message {
+            color: white;
+        }
+        </style>
         
     </h:head>
 
@@ -39,24 +43,36 @@
                     <!-- Uncomment the line below if you also wish to use an image logo -->
                     <!-- <img src="assets/img/logo.png" alt="Logo" /> -->
                     <h1>Simple EMS</h1>
+                    
                 </a>
 
                 <i class="mobile-nav-toggle mobile-nav-show bi bi-list"></i>
                 <i class="mobile-nav-toggle mobile-nav-hide d-none bi bi-x"></i>
                 <nav id="navbar" class="navbar">
-                    <ul>
-                        <li><a href="index.xhtml" class="active">Home</a></li>
+                    <ul><h:outputText value="Welcome, #{authenticationManagedBean.username}!" rendered="#{not empty authenticationManagedBean.username}" styleClass="welcome-message" />
                         
-                        <li><a href="createEvent.xhtml">Create Event</a></li>
-                        <li><a href="searchEvents.xhtml">Register for Event</a></li>
+                        <li><a href="home.xhtml" class="active">Home</a></li>
+                        
+                        <li class="dropdown"><a href="#"><span>My Events</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
+                            <ul>
+                                <li><a href="createEvent.xhtml">Create Event</a></li>
+                                <li><a href="viewEventsCreated.xhtml">View Events Created</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="searchEvents.xhtml">Join Event</a></li>
                         <li class="dropdown"><a href="#"><span>Profile</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
                             <ul>
                                 <li><a href="viewProfile.xhtml">View Profile</a></li>
                                 <li><a href="editProfile.xhtml">Edit Profile</a></li>
-                                <li><a href="#">Log Out</a></li>
+                                <li><a href="viewRegistrations.xhtml">View My Registrations</a></li>
                             </ul>
                         </li>
-                        <li><a class="get-a-quote" href="index.xhtml">Logout</a></li>
+                        <li>
+                            <h:form>
+                                <h:commandLink value="Logout" action="#{authenticationManagedBean.logout}" styleClass="get-a-quote"/>
+                            </h:form>
+                        </li>
+
                     </ul>
                 </nav><!-- .navbar -->
             </div>
