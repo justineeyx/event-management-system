@@ -20,6 +20,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.inject.Inject;
 import entity.Registration;
+import java.util.stream.Collectors;
 import javax.faces.context.Flash;
 import session.CustomerSessionBeanLocal;
 import session.EventSessionBeanLocal;
@@ -60,6 +61,7 @@ public class EventManagedBean {
     private String searchString;
     private List<Registration> regs;
     private Long smth;
+    private String searchTerm;
     
     public EventManagedBean() {
         
@@ -87,10 +89,15 @@ public class EventManagedBean {
         e.setLocation(location);
         Customer c = customerSessionBeanLocal.getCustomer(authenticationManagedBean.getUserId());
         e.setCreator(c);
+        
+        if(eventDate.before(new Date())) {
+            FacesMessage message = new FacesMessage("Event date must be in the future.");
+            FacesContext.getCurrentInstance().addMessage("formId:eventDate", message);
+        }
 
         try {
             eventSessionBeanLocal.createNewEvent(e);
-            context.addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Successfully created event"));
+            context.addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Successfully created event")); 
         } catch (Exception ex) {
             context.addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Unable to create event"));
         }
@@ -177,14 +184,15 @@ public class EventManagedBean {
     
     public void deleteEvent() {
         FacesContext context = FacesContext.getCurrentInstance();
-
-        Map<String, String> params = context.getExternalContext()
-                .getRequestParameterMap();
-        String cIdStr = params.get("cId");
-        Long cId = Long.parseLong(cIdStr);
+//
+//        Map<String, String> params = context.getExternalContext()
+//                .getRequestParameterMap();
+//        String cIdStr = params.get("cId");
+//        Long cId = Long.parseLong(cIdStr);
+        System.out.println("smth is " + smth);
 
         try {
-            eventSessionBeanLocal.deleteEvent(cId);
+            eventSessionBeanLocal.deleteEvent(smth);
         } catch (Exception e) {
             //show with an error icon
             context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Unable to delete event"));
@@ -220,11 +228,13 @@ public class EventManagedBean {
 
     public void createRegistration() {
         FacesContext context = FacesContext.getCurrentInstance();
-        Map<String, String> params = context.getExternalContext().getRequestParameterMap();
-        String cIdStr = params.get("cId");
-        Long cId = Long.parseLong(cIdStr);
+//        Map<String, String> params = context.getExternalContext().getRequestParameterMap();
+//        String cIdStr = params.get("cId");
+//        Long cId = Long.parseLong(cIdStr);
 
-        selectedEvent = eventSessionBeanLocal.getEvent(cId);
+        System.out.println("smth is " + smth);
+
+        selectedEvent = eventSessionBeanLocal.getEvent(smth);
 
         // Check if event deadline has passed or event date is over
         Date now = new Date();
@@ -261,13 +271,13 @@ public class EventManagedBean {
     public void deleteRegistration() {
         FacesContext context = FacesContext.getCurrentInstance();
 
-        Map<String, String> params = context.getExternalContext()
-                .getRequestParameterMap();
-        String cIdStr = params.get("cId");
-        Long cId = Long.parseLong(cIdStr);
+//        Map<String, String> params = context.getExternalContext()
+//                .getRequestParameterMap();
+//        String cIdStr = params.get("cId");
+//        Long cId = Long.parseLong(cIdStr);
 
         try {
-            registrationSessionBeanLocal.deleteRegistration(cId);
+            registrationSessionBeanLocal.deleteRegistration(smth);
         } catch (Exception e) {
             //show with an error icon
             context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Unable to unregister"));
@@ -422,5 +432,41 @@ public class EventManagedBean {
         this.smth = smth;
     }
     
+    public String getSearchTerm() {
+        return searchTerm;
+    }
+
+    public void setSearchTerm(String searchTerm) {
+        this.searchTerm = searchTerm;
+    }
+
+    // Method to filter events based on searchTerm
+    public void filterEvents() {
+        // System.out.println("Search term is " + searchTerm);
+        // Assuming you have a method to get all events or the original list
+        List<Event> allEvents = eventSessionBeanLocal.retrieveAllEvents();
+;
+        if (searchTerm == null || searchTerm.isEmpty()) {
+            events = allEvents;
+        } else {
+            events = allEvents.stream()
+                    .filter(e -> e.getTitle().toLowerCase().contains(searchTerm.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+    }
+    
+    public void filterMyEvents() throws ErrorException {
+        // System.out.println("Search term is " + searchTerm);
+        // Assuming you have a method to get all events or the original list
+        List<Event> allEvents = eventSessionBeanLocal.retrieveEventsByCustomer(authenticationManagedBean.getUserId());
+;
+        if (searchTerm == null || searchTerm.isEmpty()) {
+            events = allEvents;
+        } else {
+            events = allEvents.stream()
+                    .filter(e -> e.getTitle().toLowerCase().contains(searchTerm.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+    }
     
 }
