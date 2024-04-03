@@ -68,7 +68,7 @@ public class RegManagedBean implements Serializable {
     }
     
     public boolean isUserRegistered(Long id) {
-        System.out.println("smthh reg id " + id);
+        // System.out.println("smthh reg id " + id);
         Customer c = customerSessionBeanLocal.getCustomer(authenticationManagedBean.getUserId());
         boolean isRegistered = registrationSessionBeanLocal.isCustomerRegistered(c.getCustomerId(), id);
         return isRegistered;
@@ -185,8 +185,9 @@ public class RegManagedBean implements Serializable {
     
     public String updateEvent() {
         FacesContext context = FacesContext.getCurrentInstance();
-        Flash flash = context.getExternalContext().getFlash();
-        flash.setKeepMessages(true); // Keep messages for the redirect
+        boolean errors = false;
+//        Flash flash = context.getExternalContext().getFlash();
+//        flash.setKeepMessages(true); // Keep messages for the redirect
 //        Map<String, String> params = context.getExternalContext()
 //                .getRequestParameterMap();
 //        String cIdStr = params.get("eventId");
@@ -223,6 +224,28 @@ public class RegManagedBean implements Serializable {
                 if (!selectedEvent.getDeadline().equals(currentEvent.getDeadline())) {
                     currentEvent.setDeadline(selectedEvent.getDeadline());
                     isUpdated = true;
+                }
+                
+                if (selectedEvent.getEventDate().before(new Date())) {
+                    System.out.println("test");
+                    context.addMessage("edit:eventDate", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Event date must be in the future.", null));
+                    errors = true;
+                }
+    
+                if (selectedEvent.getDeadline().before(new Date())) {
+                    System.out.println("test");
+                    context.addMessage("edit:deadline", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Deadline must be in the future.", null));
+                    errors = true;
+                }
+
+                if (selectedEvent.getEventDate().before(selectedEvent.getDeadline())) {
+                    System.out.println("test2");
+                    context.addMessage("edit:deadline", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Event date must be before the deadline.", null));
+                    errors = true;
+                }
+    
+                if (errors) {
+                    return null;
                 }
                 if (isUpdated) {
                     eventSessionBeanLocal.updateCustomer(selectedEvent); // Method to persist the changes

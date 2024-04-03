@@ -17,13 +17,11 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
-import javax.faces.event.ActionEvent;
 import javax.inject.Inject;
 import entity.Registration;
 import java.util.stream.Collectors;
-import javax.faces.component.UIComponent;
 import javax.faces.context.Flash;
-import javax.faces.validator.ValidatorException;
+import javax.faces.event.AjaxBehaviorEvent;
 import session.CustomerSessionBeanLocal;
 import session.EventSessionBeanLocal;
 import session.RegistrationSessionBeanLocal;
@@ -249,7 +247,7 @@ public class EventManagedBean {
     }
     
     public boolean isUserRegistered(Long id) {
-        System.out.println("smthh reg id " + id);
+        // System.out.println("smthh reg id " + id);
         Customer c = customerSessionBeanLocal.getCustomer(authenticationManagedBean.getUserId());
         boolean isRegistered = registrationSessionBeanLocal.isCustomerRegistered(c.getCustomerId(), id);
         return isRegistered;
@@ -269,7 +267,7 @@ public class EventManagedBean {
         Date now = new Date();
         if (selectedEvent.getDeadline().before(now) || selectedEvent.getEventDate().before(now)) {
             System.out.println("nono");
-            context.addMessage("searchForm:datatable-search-input", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Registration deadline has passed or event is already over."));
+            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Registration deadline has passed or event is already over."));
             return;
         }
 
@@ -471,14 +469,16 @@ public class EventManagedBean {
     }
 
     // Method to filter events based on searchTerm
-    public void filterEvents() {
-        // System.out.println("Search term is " + searchTerm);
+    public void filterEvents(AjaxBehaviorEvent event) {
+        System.out.println("Search term is " + searchTerm);
         // Assuming you have a method to get all events or the original list
         List<Event> allEvents = eventSessionBeanLocal.retrieveAllEvents();
-;
+        System.out.println("num1");
         if (searchTerm == null || searchTerm.isEmpty()) {
+            System.out.println("num2");
             events = allEvents;
         } else {
+            System.out.println("num3");
             events = allEvents.stream()
                     .filter(e -> e.getTitle().toLowerCase().contains(searchTerm.toLowerCase()))
                     .collect(Collectors.toList());
