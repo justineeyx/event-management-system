@@ -56,6 +56,7 @@ public class RegistrationSessionBean implements RegistrationSessionBeanLocal {
     
     @Override
     public Registration getRegistration(Long regId) throws NoResultException {
+        System.out.println("reg id is " + regId);
         Registration r = em.find(Registration.class, regId);
 
         if (r != null) {

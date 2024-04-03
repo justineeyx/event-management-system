@@ -21,7 +21,9 @@ import javax.faces.event.ActionEvent;
 import javax.inject.Inject;
 import entity.Registration;
 import java.util.stream.Collectors;
+import javax.faces.component.UIComponent;
 import javax.faces.context.Flash;
+import javax.faces.validator.ValidatorException;
 import session.CustomerSessionBeanLocal;
 import session.EventSessionBeanLocal;
 import session.RegistrationSessionBeanLocal;
@@ -75,33 +77,53 @@ public class EventManagedBean {
             events = eventSessionBeanLocal.retrieveEventsByName(searchString);
         }
     }
-        
-    public void addEvent(ActionEvent evt) {
-        FacesContext context = FacesContext.getCurrentInstance();
-        Flash flash = context.getExternalContext().getFlash();
-        flash.setKeepMessages(true); // Keep messages for the redirect
+    
+    public String addEvent() {
+    FacesContext context = FacesContext.getCurrentInstance();
+    
+    boolean errors = false;
 
-        Event e = new Event();
-        e.setEventDate(eventDate);
-        e.setDeadline(deadline);
-        e.setTitle(title);
-        e.setDescription(description);
-        e.setLocation(location);
-        Customer c = customerSessionBeanLocal.getCustomer(authenticationManagedBean.getUserId());
-        e.setCreator(c);
-        
-        if(eventDate.before(new Date())) {
-            FacesMessage message = new FacesMessage("Event date must be in the future.");
-            FacesContext.getCurrentInstance().addMessage("formId:eventDate", message);
-        }
-
-        try {
-            eventSessionBeanLocal.createNewEvent(e);
-            context.addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Successfully created event")); 
-        } catch (Exception ex) {
-            context.addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Unable to create event"));
-        }
+    if (eventDate.before(new Date())) {
+        System.out.println("test");
+        context.addMessage("createForm:eventDate", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Event date must be in the future.", null));
+        errors = true;
     }
+    
+    if (deadline.before(new Date())) {
+        System.out.println("test");
+        context.addMessage("createForm:deadline", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Deadline must be in the future.", null));
+        errors = true;
+    }
+
+    if (eventDate.before(deadline)) { 
+        System.out.println("test2");
+        context.addMessage("createForm:deadline", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Event date must be before the deadline.", null));
+        errors = true;
+    }
+    
+    if (errors) {
+        return null;
+    }
+
+    Event e = new Event();
+    e.setEventDate(eventDate);
+    e.setDeadline(deadline);
+    e.setTitle(title);
+    e.setDescription(description);
+    e.setLocation(location);
+    Customer c = customerSessionBeanLocal.getCustomer(authenticationManagedBean.getUserId());
+    e.setCreator(c);
+
+    try {
+        eventSessionBeanLocal.createNewEvent(e);
+        System.out.println("yay");
+    } catch (Exception ex) {
+        context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Unable to create event"));
+        return null;
+    }
+    return "/secret/searchEvents?faces-redirect=true";
+}
+
 
     public String updateEvent() {
         FacesContext context = FacesContext.getCurrentInstance();
@@ -225,21 +247,29 @@ public class EventManagedBean {
             context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "Event ID is missing."));
         }
     }
+    
+    public boolean isUserRegistered(Long id) {
+        System.out.println("smthh reg id " + id);
+        Customer c = customerSessionBeanLocal.getCustomer(authenticationManagedBean.getUserId());
+        boolean isRegistered = registrationSessionBeanLocal.isCustomerRegistered(c.getCustomerId(), id);
+        return isRegistered;
+    }
 
-    public void createRegistration() {
+    public void createRegistration(Long eventId) {
         FacesContext context = FacesContext.getCurrentInstance();
 //        Map<String, String> params = context.getExternalContext().getRequestParameterMap();
 //        String cIdStr = params.get("cId");
 //        Long cId = Long.parseLong(cIdStr);
 
-        System.out.println("smth is " + smth);
+        System.out.println("event id is " + eventId);
 
-        selectedEvent = eventSessionBeanLocal.getEvent(smth);
+        selectedEvent = eventSessionBeanLocal.getEvent(eventId);
 
         // Check if event deadline has passed or event date is over
         Date now = new Date();
         if (selectedEvent.getDeadline().before(now) || selectedEvent.getEventDate().before(now)) {
-            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Registration deadline has passed or event is already over."));
+            System.out.println("nono");
+            context.addMessage("searchForm:datatable-search-input", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Registration deadline has passed or event is already over."));
             return;
         }
 
@@ -294,47 +324,47 @@ public class EventManagedBean {
         return regs;
     }
     
-    public void markPresent() {
-        FacesContext context = FacesContext.getCurrentInstance();
-
-        Map<String, String> params = context.getExternalContext()
-                .getRequestParameterMap();
-        String cIdStr = params.get("cId");
-        Long cId = Long.parseLong(cIdStr);
-
-        try {
-            selectedEvent = eventSessionBeanLocal.retrieveEventsByRegId(cId);
-            registrationSessionBeanLocal.markPresent(cId);
-        } catch (Exception e) {
-            //show with an error icon
-            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Unable to mark attendance"));
-            return;
-        }
-
-        context.addMessage(null, new FacesMessage("Success", "Marked Present"));
-        // init();
-    }
-    
-    public void markAbsent() {
-        FacesContext context = FacesContext.getCurrentInstance();
-
-        Map<String, String> params = context.getExternalContext()
-                .getRequestParameterMap();
-        String cIdStr = params.get("cId");
-        Long cId = Long.parseLong(cIdStr);
-
-        try {
-            selectedEvent = eventSessionBeanLocal.retrieveEventsByRegId(cId);
-            registrationSessionBeanLocal.markAbsent(cId);
-        } catch (Exception e) {
-            //show with an error icon
-            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Unable to mark attendance"));
-            return;
-        }
-
-        context.addMessage(null, new FacesMessage("Success", "Marked Absent"));
-        // init();
-    }
+//    public void markPresent() {
+//        FacesContext context = FacesContext.getCurrentInstance();
+//
+//        Map<String, String> params = context.getExternalContext()
+//                .getRequestParameterMap();
+//        String cIdStr = params.get("cId");
+//        Long cId = Long.parseLong(cIdStr);
+//
+//        try {
+//            selectedEvent = eventSessionBeanLocal.retrieveEventsByRegId(cId);
+//            registrationSessionBeanLocal.markPresent(cId);
+//        } catch (Exception e) {
+//            //show with an error icon
+//            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Unable to mark attendance"));
+//            return;
+//        }
+//
+//        context.addMessage(null, new FacesMessage("Success", "Marked Present"));
+//        // init();
+//    }
+//    
+//    public void markAbsent() {
+//        FacesContext context = FacesContext.getCurrentInstance();
+//
+//        Map<String, String> params = context.getExternalContext()
+//                .getRequestParameterMap();
+//        String cIdStr = params.get("cId");
+//        Long cId = Long.parseLong(cIdStr);
+//
+//        try {
+//            selectedEvent = eventSessionBeanLocal.retrieveEventsByRegId(cId);
+//            registrationSessionBeanLocal.markAbsent(cId);
+//        } catch (Exception e) {
+//            //show with an error icon
+//            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Unable to mark attendance"));
+//            return;
+//        }
+//
+//        context.addMessage(null, new FacesMessage("Success", "Marked Absent"));
+//        // init();
+//    }
     
     public String getTitle() {
         return title;

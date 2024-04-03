@@ -5,17 +5,22 @@
  */
 package managedbean;
 
+import entity.Customer;
 import entity.Event;
 import entity.Registration;
 import javax.inject.Named;
 import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.context.Flash;
+import javax.inject.Inject;
+import session.CustomerSessionBeanLocal;
 import session.EventSessionBeanLocal;
 import session.RegistrationSessionBeanLocal;
 
@@ -33,20 +38,82 @@ public class RegManagedBean implements Serializable {
     @EJB(name = "RegistrationSessionBeanLocal")
     private RegistrationSessionBeanLocal registrationSessionBeanLocal;
     
+    @Inject
+    private AuthenticationManagedBean authenticationManagedBean;
+    
+    @EJB
+    private CustomerSessionBeanLocal customerSessionBeanLocal;
+       
     private Event selectedEvent;
     private List<Registration> regs;
     private Long regId;
     private Long eventId;
+    private List<Event> events;
 
     /**
      * Creates a new instance of RegManagedBean
      */
+    
+    @PostConstruct
+    public void init() {
+        events = eventSessionBeanLocal.retrieveAllEvents();     
+    }
+    
     public RegManagedBean() {
     }
     
     public List<Registration> getRegs(long cId) {
         regs = registrationSessionBeanLocal.retrieveAllRegistrationsWithEvent(cId);
         return regs;
+    }
+    
+    public boolean isUserRegistered(Long id) {
+        System.out.println("smthh reg id " + id);
+        Customer c = customerSessionBeanLocal.getCustomer(authenticationManagedBean.getUserId());
+        boolean isRegistered = registrationSessionBeanLocal.isCustomerRegistered(c.getCustomerId(), id);
+        return isRegistered;
+    }
+    
+    public void createRegistration(Long eventId) {
+        FacesContext context = FacesContext.getCurrentInstance();
+//        Map<String, String> params = context.getExternalContext().getRequestParameterMap();
+//        String cIdStr = params.get("cId");
+//        Long cId = Long.parseLong(cIdStr);
+
+        System.out.println("event id is " + eventId);
+
+        selectedEvent = eventSessionBeanLocal.getEvent(eventId);
+
+        // Check if event deadline has passed or event date is over
+        Date now = new Date();
+        if (selectedEvent.getDeadline().before(now) || selectedEvent.getEventDate().before(now)) {
+            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Registration deadline has passed or event is already over."));
+            return;
+        }
+
+        Customer c = customerSessionBeanLocal.getCustomer(authenticationManagedBean.getUserId());
+
+        // Check if customer is already registered for the event
+        boolean isRegistered = registrationSessionBeanLocal.isCustomerRegistered(c.getCustomerId(), selectedEvent.getEventId());
+        if (isRegistered) {
+            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "You are already registered for this event."));
+            return;
+        }
+
+        Registration r = new Registration();
+        r.setEvent(selectedEvent);
+        r.setAttended(false);
+        r.setCustomer(c);
+
+        try {
+            registrationSessionBeanLocal.createNewRegistration(r);
+            c.getEventsRegistered().add(r);
+        } catch (Exception e) {
+            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Unable to register"));
+            return;
+        }
+
+        context.addMessage(null, new FacesMessage("Success", "Successfully registered for event"));
     }
     
     public void loadEventDetails() {
@@ -75,15 +142,15 @@ public class RegManagedBean implements Serializable {
     public void markPresent() {
         FacesContext context = FacesContext.getCurrentInstance();
 
-        Map<String, String> params = context.getExternalContext()
-                .getRequestParameterMap();
-        String cIdStr = params.get("cId");
-        Long cId = Long.parseLong(cIdStr);
+//        Map<String, String> params = context.getExternalContext()
+//                .getRequestParameterMap();
+//        String cIdStr = params.get("cId");
+//        Long cId = Long.parseLong(cIdStr);
 
         try {
-            this.selectedEvent = eventSessionBeanLocal.retrieveEventsByRegId(cId);
-            System.out.println("event id " + selectedEvent.getEventId());
-            registrationSessionBeanLocal.markPresent(cId);
+//            this.selectedEvent = eventSessionBeanLocal.retrieveEventsByRegId(cId);
+//            System.out.println("event id " + selectedEvent.getEventId());
+            registrationSessionBeanLocal.markPresent(regId);
         } catch (Exception e) {
             //show with an error icon
             context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Unable to mark attendance"));
@@ -97,15 +164,15 @@ public class RegManagedBean implements Serializable {
     public void markAbsent() {
         FacesContext context = FacesContext.getCurrentInstance();
 
-        Map<String, String> params = context.getExternalContext()
-                .getRequestParameterMap();
-        String cIdStr = params.get("cId");
-        Long cId = Long.parseLong(cIdStr);
+//        Map<String, String> params = context.getExternalContext()
+//                .getRequestParameterMap();
+//        String cIdStr = params.get("cId");
+//        Long cId = Long.parseLong(cIdStr);
 
         try {
-            selectedEvent = eventSessionBeanLocal.retrieveEventsByRegId(cId);
-            System.out.println("event id " + selectedEvent.getEventId());
-            registrationSessionBeanLocal.markAbsent(cId);
+//            selectedEvent = eventSessionBeanLocal.retrieveEventsByRegId(cId);
+//            System.out.println("event id " + selectedEvent.getEventId());
+            registrationSessionBeanLocal.markAbsent(regId);
         } catch (Exception e) {
             //show with an error icon
             context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Unable to mark attendance"));
@@ -209,6 +276,14 @@ public class RegManagedBean implements Serializable {
 
     public void setEventId(Long eventId) {
         this.eventId = eventId;
+    }
+
+    public List<Event> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<Event> events) {
+        this.events = events;
     }
     
     
