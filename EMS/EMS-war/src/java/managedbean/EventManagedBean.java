@@ -210,16 +210,22 @@ public class EventManagedBean {
 //        String cIdStr = params.get("cId");
 //        Long cId = Long.parseLong(cIdStr);
         System.out.println("smth is " + smth);
+        Event e1 = eventSessionBeanLocal.getEvent(smth);
+        if (!e1.getRegistrations().isEmpty()) {
+            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error,", "Event has registrations"));
+            return;
+        }
 
         try {
             eventSessionBeanLocal.deleteEvent(smth);
         } catch (Exception e) {
             //show with an error icon
-            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Unable to delete event"));
+            System.out.println("Nope");
+            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error,", "Unable to delete event"));
             return;
         }
 
-        context.addMessage(null, new FacesMessage("Success", "Successfully deleted event"));
+        // context.addMessage(null, new FacesMessage("Success", "Successfully deleted event"));
         init();
 
     } 
@@ -266,8 +272,8 @@ public class EventManagedBean {
         // Check if event deadline has passed or event date is over
         Date now = new Date();
         if (selectedEvent.getDeadline().before(now) || selectedEvent.getEventDate().before(now)) {
-            System.out.println("nono");
-            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Registration deadline has passed or event is already over."));
+            System.out.println("cannot");
+            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error,", "Registration deadline has passed or event is already over."));
             return;
         }
 
@@ -293,7 +299,7 @@ public class EventManagedBean {
             return;
         }
 
-        context.addMessage(null, new FacesMessage("Success", "Successfully registered for event"));
+        // context.addMessage(null, new FacesMessage("Success,", "Successfully registered for event"));
     }
     
     public void deleteRegistration() {

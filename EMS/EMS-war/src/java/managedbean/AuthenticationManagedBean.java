@@ -6,8 +6,8 @@ import javax.inject.Named;
 import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
 import javax.ejb.EJB;
+import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
-import javax.faces.context.Flash;
 import javax.inject.Inject;
 import session.CustomerSessionBeanLocal;
 
@@ -29,7 +29,7 @@ public class AuthenticationManagedBean implements Serializable {
     }
 
     public String login() throws ErrorException {
-//        FacesContext context = FacesContext.getCurrentInstance();
+        FacesContext context = FacesContext.getCurrentInstance();
 //        Flash flash = context.getExternalContext().getFlash();
 //        flash.setKeepMessages(true); // Keep messages for the redirect
 
@@ -40,7 +40,7 @@ public class AuthenticationManagedBean implements Serializable {
             // context.addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Successfully logged in"));
             return "/secret/home.xhtml?faces-redirect=true";
         } catch (ErrorException ex) {
-            // context.addMessage("growl", new FacesMessage(FacesMessage.SEVERITY_ERROR, "Login Error", "Username does not exist or invalid password!"));
+            context.addMessage(null , new FacesMessage(FacesMessage.SEVERITY_ERROR, "Login Error,", "Username does not exist or invalid password!"));
             return null; // Stay on the same page to display the error
         }
     }
