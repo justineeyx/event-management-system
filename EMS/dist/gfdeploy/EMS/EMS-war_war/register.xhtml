@@ -80,14 +80,12 @@
                                                      a:placeholder="Phone" />
                                         <h:message for="phone" class="text-danger"/>
                                     </div>
-                                    
-                                    <div class="col-md-4 gradient-custom text-center text-white"
-                                     style="border-top-left-radius: .5rem; border-bottom-left-radius: .5rem;">
-                                        <i class="far fa-edit mb-5"></i>
-                                        <h:inputFile value="#{customerManagedBean.uploadedfile}" style="display: none;" id="fileInput" />
-                                        <h:outputLabel for="fileInput" styleClass="btn btn-secondary">Choose Picture</h:outputLabel>
-                                        <h:commandButton value="Upload" action="#{customerManagedBean.upload()}" styleClass="btn btn-primary"/>
-                                    </div>
+
+
+                                    <h:inputFile value="#{customerManagedBean.uploadedfile}" style="display: none;" id="fileInput" />
+                                    <h:outputLabel for="fileInput" styleClass="btn btn-block btn-secondary">Choose Picture</h:outputLabel>
+                                    <h:commandButton value="Upload" action="#{customerManagedBean.upload()}" styleClass="btn btn-block btn-primary"/>
+
 
                                     <h:commandButton value="Sign Up" actionListener="#{customerManagedBean.addCustomer}"  action="login.xhtml?faces-redirect=true" class="btn btn-block btn-primary"/>
                                     <span class="d-block text-left my-4 text-muted">&mdash; already have an account? &mdash;</span>
